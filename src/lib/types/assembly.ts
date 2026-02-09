@@ -110,7 +110,8 @@ export type ComponentRole =
   | 'drawer_front'
   | 'drawer_side'
   | 'drawer_back'
-  | 'drawer_bottom';
+  | 'drawer_bottom'
+  | 'toe_kick_panel';
 
 /**
  * Component - Atomic unit representing a single panel/part

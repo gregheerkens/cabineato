@@ -146,7 +146,7 @@ export function generateBackPanelDado(
     width: panelThickness, // Dado width matches back panel material thickness
     depth: dadoDepth,
     path,
-    purpose: 'dado',
+    purpose: 'back_panel',
   };
 }
 
@@ -182,7 +182,7 @@ export function generateHorizontalBackPanelDado(
     width: panelThickness, // Dado width matches back panel material thickness
     depth: dadoDepth,
     path,
-    purpose: 'dado',
+    purpose: 'back_panel',
   };
 }
 

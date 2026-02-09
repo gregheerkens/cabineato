@@ -23,6 +23,7 @@ import {
   validateCarcassConfig,
   generateLeftSidePanel,
   generateRightSidePanel,
+  generateToeKickPanel,
 } from './carcass';
 
 import {
@@ -80,7 +81,10 @@ export function validateConfig(config: AssemblyConfig): ValidationResult {
   errors.push(...validateDrawerConfig(config));
 
   // Check for conflicting features
-  if (config.features.shelves.enabled && config.features.drawers.enabled) {
+  const shelvesEnabled = ('adjustable' in config.features.shelves)
+    ? config.features.shelves.adjustable.enabled
+    : (config.features.shelves as { enabled?: boolean }).enabled;
+  if (shelvesEnabled && config.features.drawers.enabled) {
     warnings.push(
       'Both shelves and drawers are enabled. ' +
         'Shelf pin holes will be generated but may interfere with drawer slides.'
@@ -123,6 +127,12 @@ export function buildAssembly(config: AssemblyConfig): Assembly {
   const backPanelComponent = generateBackPanel(config);
   if (backPanelComponent) {
     components.push(backPanelComponent);
+  }
+
+  // 2b. Generate toe kick panel (if any)
+  const toeKickComponent = generateToeKickPanel(config);
+  if (toeKickComponent) {
+    components.push(toeKickComponent);
   }
 
   // 3. Generate adjustable shelves

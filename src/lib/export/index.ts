@@ -8,6 +8,7 @@
 export {
   generateSVG,
   downloadSVG,
+  generateComponentSVG,
   type SVGExportOptions,
 } from './svg';
 
@@ -16,6 +17,7 @@ export {
   generateDXF,
   generateDXFModel,
   downloadDXF,
+  generateComponentModel,
   type DXFExportOptions,
 } from './dxf';
 
@@ -26,3 +28,14 @@ export {
   generateSimpleCutList,
   type CutListOptions,
 } from './cutlist';
+
+// Nested Exports
+export {
+  generateNestedSVGs,
+  type NestedSVGFile,
+} from './nestedSvg';
+
+export {
+  generateNestedDXFs,
+  type NestedDXFFile,
+} from './nestedDxf';

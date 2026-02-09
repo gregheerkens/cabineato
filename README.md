@@ -118,15 +118,6 @@ Exports follow Vectric-compatible layer naming:
 - Pre-drill options for drawer pulls (single/double hole)
 - Slide mounting hole pre-drills
 
-## Documentation
-
-See the `/documentation` folder for:
-- Domain specification (DOMAIN.md)
-- Object definitions (OBJECTS.md)
-- Code ethos (CODE_ETHOS.md)
-- Test specifications (TESTS.md)
-- Additional context (AdditionalContext.md)
-
 ## License
 
 MIT

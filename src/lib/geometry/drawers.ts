@@ -140,12 +140,9 @@ export function generateDrawerPullHoles(
   let centerX: number;
   if (pullConfig.horizontalPosition === 'center') {
     centerX = frontWidth / 2;
-  } else if (pullConfig.horizontalPosition === 'left') {
-    // 50mm from left edge
-    centerX = 50;
   } else {
-    // 50mm from right edge
-    centerX = frontWidth - 50;
+    // Numeric offset from center
+    centerX = frontWidth / 2 + pullConfig.horizontalPosition;
   }
 
   if (pullConfig.type === 'single') {
@@ -260,7 +257,7 @@ export function generateDrawerSides(
       [DRAWER_BOX_THICKNESS, DRAWER_BOTTOM_DADO_OFFSET],
       [dims.boxDepth - DRAWER_BOX_THICKNESS, DRAWER_BOTTOM_DADO_OFFSET],
     ],
-    purpose: 'dado',
+    purpose: 'drawer_bottom',
   };
 
   const leftSide: Component = {

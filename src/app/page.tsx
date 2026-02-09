@@ -11,7 +11,11 @@ import dynamic from 'next/dynamic';
 import { ParameterForm } from '@/components/ParameterForm';
 import { CutList } from '@/components/CutList';
 import { ExportPanel } from '@/components/ExportPanel';
+import { NestingPanel } from '@/components/NestingPanel';
+import { SheetView } from '@/components/SheetView';
 import { useAssembly } from '@/hooks/useAssembly';
+import { useNesting } from '@/hooks/useNesting';
+import { formatAsInches } from '@/lib/types';
 
 // Dynamically import Preview3D to avoid SSR issues with Three.js
 const Preview3D = dynamic(() => import('@/components/Preview3D'), {
@@ -23,6 +27,8 @@ const Preview3D = dynamic(() => import('@/components/Preview3D'), {
   ),
 });
 
+type ViewMode = '3d' | 'nesting';
+
 export default function Home() {
   const {
     config,
@@ -33,8 +39,17 @@ export default function Home() {
     warnings,
   } = useAssembly();
 
+  const {
+    nestingConfig,
+    updateNestingConfig,
+    result: nestingResult,
+    isEnabled: nestingEnabled,
+    setEnabled: setNestingEnabled,
+  } = useNesting(assembly);
+
   const [selectedComponentId, setSelectedComponentId] = useState<string>();
   const [showImperial, setShowImperial] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('3d');
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -96,11 +111,39 @@ export default function Home() {
             />
           </div>
 
-          {/* Center Column: 3D Preview */}
+          {/* Center Column: Preview */}
           <div className="lg:col-span-6">
             <div className="sticky top-6">
+              {/* View mode toggle */}
+              {assembly && nestingEnabled && nestingResult && (
+                <div className="flex mb-2 bg-gray-100 rounded-lg p-1">
+                  <button
+                    onClick={() => setViewMode('3d')}
+                    className={`flex-1 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                      viewMode === '3d'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    3D Preview
+                  </button>
+                  <button
+                    onClick={() => setViewMode('nesting')}
+                    className={`flex-1 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                      viewMode === 'nesting'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Sheet Nesting
+                  </button>
+                </div>
+              )}
+
               <div className="h-[500px] lg:h-[600px]">
-                {assembly ? (
+                {viewMode === 'nesting' && nestingResult ? (
+                  <SheetView result={nestingResult} showImperial={showImperial} className="h-full" />
+                ) : assembly ? (
                   <Preview3D
                     assembly={assembly}
                     selectedComponentId={selectedComponentId}
@@ -119,7 +162,7 @@ export default function Home() {
               {/* Assembly Summary */}
               {assembly && (
                 <div className="mt-4 p-4 bg-white rounded-lg shadow-sm">
-                  <h3 className="font-medium text-gray-900 mb-2">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">
                     Assembly Summary
                   </h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
@@ -130,6 +173,12 @@ export default function Home() {
                         {config.globalBounds.w} × {config.globalBounds.h} ×{' '}
                         {config.globalBounds.d} mm
                       </span>
+                      {showImperial && (
+                        <span className="text-xs text-gray-400 block">
+                          {formatAsInches(config.globalBounds.w)} × {formatAsInches(config.globalBounds.h)} ×{' '}
+                          {formatAsInches(config.globalBounds.d)}
+                        </span>
+                      )}
                     </div>
                     <div>
                       <span className="text-gray-500">Interior Size:</span>
@@ -138,6 +187,12 @@ export default function Home() {
                         {assembly.interiorBounds.w} × {assembly.interiorBounds.h} ×{' '}
                         {assembly.interiorBounds.d} mm
                       </span>
+                      {showImperial && (
+                        <span className="text-xs text-gray-400 block">
+                          {formatAsInches(assembly.interiorBounds.w)} × {formatAsInches(assembly.interiorBounds.h)} ×{' '}
+                          {formatAsInches(assembly.interiorBounds.d)}
+                        </span>
+                      )}
                     </div>
                     <div>
                       <span className="text-gray-500">Components:</span>
@@ -151,6 +206,11 @@ export default function Home() {
                       <br />
                       <span className="font-medium">
                         {config.material.thickness}mm
+                        {showImperial && (
+                          <span className="text-xs text-gray-400 ml-1">
+                            ({formatAsInches(config.material.thickness)})
+                          </span>
+                        )}
                       </span>
                     </div>
                   </div>
@@ -163,7 +223,19 @@ export default function Home() {
           <div className="lg:col-span-3 space-y-4">
             {assembly && (
               <>
-                <ExportPanel assembly={assembly} />
+                <ExportPanel
+                  assembly={assembly}
+                  nestingResult={nestingEnabled ? nestingResult : null}
+                  showImperial={showImperial}
+                />
+                <NestingPanel
+                  isEnabled={nestingEnabled}
+                  onToggleEnabled={setNestingEnabled}
+                  config={nestingConfig}
+                  onUpdateConfig={updateNestingConfig}
+                  result={nestingResult}
+                  showImperial={showImperial}
+                />
                 <CutList assembly={assembly} showImperial={showImperial} />
               </>
             )}

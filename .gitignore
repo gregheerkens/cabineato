@@ -55,3 +55,9 @@ next-env.d.ts
 
 # Cursor
 .cursor/
+
+# Claude Code
+.claude/
+
+# DOCTIO documentation artifacts
+/documentation/

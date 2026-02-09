@@ -30,6 +30,10 @@ const GROUPS: { name: string; roles: ComponentRole[] }[] = [
     name: 'Drawers',
     roles: ['drawer_front', 'drawer_side', 'drawer_back', 'drawer_bottom'],
   },
+  {
+    name: 'Toe Kick',
+    roles: ['toe_kick_panel'],
+  },
 ];
 
 /**
@@ -79,15 +83,15 @@ export function CutList({ assembly, showImperial = false, className = '' }: CutL
 
         return (
           <div key={group.name} className="mb-4">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">{group.name}</h3>
+            <h3 className="text-sm font-semibold text-gray-700 mb-2">{group.name}</h3>
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-1 font-medium text-gray-600">Qty</th>
-                  <th className="text-left py-1 font-medium text-gray-600">Part</th>
-                  <th className="text-right py-1 font-medium text-gray-600">W</th>
-                  <th className="text-right py-1 font-medium text-gray-600">H</th>
-                  <th className="text-right py-1 font-medium text-gray-600">T</th>
+                  <th className="text-left py-1 font-medium text-gray-500">Qty</th>
+                  <th className="text-left py-1 font-medium text-gray-500">Part</th>
+                  <th className="text-right py-1 font-medium text-gray-500">W</th>
+                  <th className="text-right py-1 font-medium text-gray-500">H</th>
+                  <th className="text-right py-1 font-medium text-gray-500">T</th>
                 </tr>
               </thead>
               <tbody>

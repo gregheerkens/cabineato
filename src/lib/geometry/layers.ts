@@ -29,7 +29,7 @@ export interface LayerConfig {
 /**
  * Layer configurations for all CNC layers
  */
-export const LAYER_CONFIGS: Record<CNCLayer, LayerConfig> = {
+export const LAYER_CONFIGS: Partial<Record<CNCLayer, LayerConfig>> & Record<'OUTSIDE_CUT' | 'DRILL_5MM' | 'POCKET_DADO', LayerConfig> = {
   OUTSIDE_CUT: {
     name: 'OUTSIDE_CUT',
     description: 'External boundaries for through-cutting',
@@ -53,7 +53,7 @@ export const LAYER_CONFIGS: Record<CNCLayer, LayerConfig> = {
 /**
  * Get layer configuration by layer type
  */
-export function getLayerConfig(layer: CNCLayer): LayerConfig {
+export function getLayerConfig(layer: CNCLayer): LayerConfig | undefined {
   return LAYER_CONFIGS[layer];
 }
 

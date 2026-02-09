@@ -23,70 +23,7 @@ import type {
 } from '../types';
 import { LAYER_CONFIGS } from '../geometry/layers';
 import { generateRectangleDogbones, generateNotchDogbones } from '../geometry/dogbone';
-
-/**
- * Get the flat (2D) cutting dimensions for a component.
- * 
- * Components are stored with 3D dimensions [x, y, z] for assembly visualization,
- * but for CNC cutting we need the 2D face dimensions (excluding thickness).
- * 
- * The cutting dimensions depend on the panel orientation:
- * - Side panels: laid on their face, cut depth × height
- * - Top/Bottom panels: laid on their face, cut width × depth  
- * - Back panels: already flat, cut width × height
- * - Shelves: laid on their face, cut width × depth
- */
-function getFlatDimensions(component: Component): { width: number; height: number } {
-  const [dimX, dimY, dimZ] = component.dimensions;
-  const thickness = component.materialThickness;
-
-  // Determine which dimension is the thickness and exclude it
-  // The two larger dimensions are the cutting face
-  const dims = [dimX, dimY, dimZ].sort((a, b) => b - a);
-  
-  // For most panels, we want the two largest dimensions
-  // But we need to be smart about orientation for proper layout
-  
-  switch (component.role) {
-    case 'side_panel_left':
-    case 'side_panel_right':
-      // Side panels: [thickness, height, depth] → cut as depth × height
-      return { width: dimZ, height: dimY };
-      
-    case 'top_panel':
-    case 'bottom_panel':
-      // Top/Bottom: [width, thickness, depth] → cut as width × depth
-      return { width: dimX, height: dimZ };
-      
-    case 'back_panel':
-      // Back: [width, height, thickness] → cut as width × height
-      return { width: dimX, height: dimY };
-      
-    case 'shelf':
-      // Shelf: [width, thickness, depth] → cut as width × depth
-      return { width: dimX, height: dimZ };
-      
-    case 'drawer_front':
-      // Drawer front: [width, height, thickness] → cut as width × height
-      return { width: dimX, height: dimY };
-      
-    case 'drawer_side':
-      // Drawer side: [thickness, height, depth] → cut as depth × height
-      return { width: dimZ, height: dimY };
-      
-    case 'drawer_back':
-      // Drawer back: [width, height, thickness] → cut as width × height
-      return { width: dimX, height: dimY };
-      
-    case 'drawer_bottom':
-      // Drawer bottom: [width, thickness, depth] → cut as width × depth
-      return { width: dimX, height: dimZ };
-      
-    default:
-      // Default: use two largest dimensions
-      return { width: dims[0], height: dims[1] };
-  }
-}
+import { getFlatDimensions } from '../nesting/flatDimensions';
 
 /**
  * SVG export options
@@ -236,7 +173,7 @@ function dogboneCircles(
 /**
  * Generate SVG content for a single component
  */
-function generateComponentSVG(
+export function generateComponentSVG(
   component: Component,
   offsetX: number,
   offsetY: number,
@@ -388,8 +325,8 @@ export function generateSVG(
   // Layout components
   const { items, totalWidth, totalHeight } = layoutComponents(panels, opts.margin);
 
-  // Collect SVG content by layer
-  const layers: Record<CNCLayer, string[]> = {
+  // Collect SVG content by layer (only the 3 primary export layers)
+  const layers: Record<string, string[]> = {
     OUTSIDE_CUT: [],
     DRILL_5MM: [],
     POCKET_DADO: [],

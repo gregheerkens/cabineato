@@ -471,6 +471,7 @@ export function ParameterForm({
           step={0.1}
           showImperial={showImperial}
         />
+        <p className="text-xs text-gray-500">Material removed by the saw blade per cut</p>
         <div className="border-t pt-4 mt-4">
           <h4 className="text-sm font-medium text-gray-600 mb-3">Secondary Materials</h4>
           <div className="grid grid-cols-2 gap-4">
@@ -542,8 +543,19 @@ export function ParameterForm({
         <Toggle
           label="Enable Shelf Pin Holes"
           checked={adjustable?.enabled ?? false}
-          onChange={(v) => updateAdjustableShelves({ enabled: v })}
+          onChange={(v) => {
+            const currentShelves = config.features.shelves;
+            const nextShelves = { ...currentShelves };
+            if ('adjustable' in nextShelves) nextShelves.adjustable = { ...nextShelves.adjustable, enabled: v };
+            if (v && 'fixed' in nextShelves && nextShelves.fixed) {
+              nextShelves.fixed = { ...nextShelves.fixed, enabled: false };
+            }
+            onChange({ ...config, features: { ...config.features, shelves: nextShelves } });
+          }}
         />
+        <p className="text-xs text-gray-500 -mt-2">
+          Disables fixed shelf dados
+        </p>
         {adjustable?.enabled && (
           <div className="grid grid-cols-2 gap-4 mt-4">
             <NumberInput
@@ -571,8 +583,19 @@ export function ParameterForm({
         <Toggle
           label="Enable Fixed Shelves"
           checked={fixed?.enabled ?? false}
-          onChange={(v) => updateFixedShelves({ enabled: v })}
+          onChange={(v) => {
+            const currentShelves = config.features.shelves;
+            const nextShelves = { ...currentShelves };
+            if ('fixed' in nextShelves) nextShelves.fixed = { ...nextShelves.fixed, enabled: v };
+            if (v && 'adjustable' in nextShelves && nextShelves.adjustable) {
+              nextShelves.adjustable = { ...nextShelves.adjustable, enabled: false };
+            }
+            onChange({ ...config, features: { ...config.features, shelves: nextShelves } });
+          }}
         />
+        <p className="text-xs text-gray-500 -mt-2">
+          Disables adjustable shelf pin holes
+        </p>
         {fixed?.enabled && (
           <div className="space-y-4 mt-4">
             <p className="text-xs text-gray-500">
@@ -686,8 +709,36 @@ export function ParameterForm({
         <Toggle
           label="Enable Drawers"
           checked={config.features.drawers.enabled}
-          onChange={(v) => updateDrawers({ enabled: v })}
+          onChange={(v) => {
+            const next = {
+              ...config,
+              features: {
+                ...config.features,
+                drawers: { ...config.features.drawers, enabled: v },
+              },
+              predrills: { ...config.predrills },
+            };
+            if (v) {
+              // Auto-enable slide pre-drills
+              next.predrills = {
+                ...next.predrills,
+                slides: { ...next.predrills?.slides, enabled: true },
+              };
+              // Auto-disable shelf runners
+              const shelves = next.features.shelves;
+              if ('runners' in shelves && shelves.runners) {
+                next.features = {
+                  ...next.features,
+                  shelves: { ...shelves, runners: { ...shelves.runners, enabled: false } },
+                };
+              }
+            }
+            onChange(next);
+          }}
         />
+        <p className="text-xs text-gray-500 -mt-2">
+          Enables slide pre-drills; disables shelf runners
+        </p>
         {config.features.drawers.enabled && (
           <div className="space-y-4 mt-4">
             <div className="grid grid-cols-2 gap-4">

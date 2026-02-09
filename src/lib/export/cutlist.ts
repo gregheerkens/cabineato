@@ -57,6 +57,10 @@ const COMPONENT_GROUPS: ComponentGroup[] = [
     name: 'Drawer Components',
     roles: ['drawer_front', 'drawer_side', 'drawer_back', 'drawer_bottom'],
   },
+  {
+    name: 'Toe Kick',
+    roles: ['toe_kick_panel'],
+  },
 ];
 
 /**

@@ -182,7 +182,7 @@ export function generateSlidePredrillsForDrawer(
       pos: [xPos, slideY],
       diameter,
       depth: 0, // 0 = through hole
-      purpose: 'slide_mount',
+      purpose: 'hardware',
     };
     holes.push(hole);
   }
@@ -414,6 +414,32 @@ export function generateBottomPanel(config: AssemblyConfig): Component {
     role: 'bottom_panel',
     dimensions: [panelWidth, thickness, panelDepth],
     position: [posX, posY, 0],
+    rotation: [0, 0, 0],
+    features: [],
+    layer: 'OUTSIDE_CUT',
+    materialThickness: thickness,
+  };
+}
+
+/**
+ * Generate the toe kick front panel
+ *
+ * A vertical panel that spans across the front of the toe kick notch,
+ * between the two side panels.
+ */
+export function generateToeKickPanel(config: AssemblyConfig): Component | null {
+  const { globalBounds, material, features } = config;
+  if (!features.toeKick.enabled) return null;
+
+  const thickness = material.thickness;
+  const panelWidth = globalBounds.w - 2 * thickness;
+
+  return {
+    id: generateId('toe_kick_panel'),
+    label: 'Toe Kick Panel',
+    role: 'toe_kick_panel',
+    dimensions: [panelWidth, features.toeKick.height, thickness],
+    position: [thickness, 0, features.toeKick.depth - thickness],
     rotation: [0, 0, 0],
     features: [],
     layer: 'OUTSIDE_CUT',

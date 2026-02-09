@@ -23,10 +23,13 @@ const ROLE_COLORS: Record<ComponentRole, string> = {
   bottom_panel: '#A0522D',
   back_panel: '#D2B48C',         // Tan
   shelf: '#DEB887',              // Burlywood
+  fixed_shelf: '#DEB887',        // Burlywood
+  adjustable_shelf: '#DEB887',   // Burlywood
   drawer_front: '#CD853F',       // Peru
   drawer_side: '#F5DEB3',        // Wheat
   drawer_back: '#F5DEB3',
   drawer_bottom: '#FFE4C4',      // Bisque
+  toe_kick_panel: '#A0522D',     // Sienna
 };
 
 /**
@@ -114,7 +117,19 @@ function AssemblyView({
       case 'back_panel':
         return [0, 0, offset];
       case 'shelf':
+      case 'fixed_shelf':
+      case 'adjustable_shelf':
         return [0, 0, -offset * 0.5];
+      case 'toe_kick_panel':
+        return [0, -offset, 0];
+      case 'drawer_front':
+        return [0, 0, -offset];
+      case 'drawer_side':
+        return [0, 0, -offset * 0.5];
+      case 'drawer_back':
+        return [0, 0, offset * 0.5];
+      case 'drawer_bottom':
+        return [0, -offset * 0.3, 0];
       default:
         return [0, 0, 0];
     }

@@ -21,57 +21,7 @@ import type {
   ComponentRole,
 } from '../types';
 import { generateRectangleDogbones, generateNotchDogbones, DogboneFillet } from '../geometry/dogbone';
-
-/**
- * Get the flat (2D) cutting dimensions for a component.
- * 
- * Components are stored with 3D dimensions [x, y, z] for assembly visualization,
- * but for CNC cutting we need the 2D face dimensions (excluding thickness).
- */
-function getFlatDimensions(component: Component): { width: number; height: number } {
-  const [dimX, dimY, dimZ] = component.dimensions;
-
-  switch (component.role) {
-    case 'side_panel_left':
-    case 'side_panel_right':
-      // Side panels: [thickness, height, depth] → cut as depth × height
-      return { width: dimZ, height: dimY };
-      
-    case 'top_panel':
-    case 'bottom_panel':
-      // Top/Bottom: [width, thickness, depth] → cut as width × depth
-      return { width: dimX, height: dimZ };
-      
-    case 'back_panel':
-      // Back: [width, height, thickness] → cut as width × height
-      return { width: dimX, height: dimY };
-      
-    case 'shelf':
-      // Shelf: [width, thickness, depth] → cut as width × depth
-      return { width: dimX, height: dimZ };
-      
-    case 'drawer_front':
-      // Drawer front: [width, height, thickness] → cut as width × height
-      return { width: dimX, height: dimY };
-      
-    case 'drawer_side':
-      // Drawer side: [thickness, height, depth] → cut as depth × height
-      return { width: dimZ, height: dimY };
-      
-    case 'drawer_back':
-      // Drawer back: [width, height, thickness] → cut as width × height
-      return { width: dimX, height: dimY };
-      
-    case 'drawer_bottom':
-      // Drawer bottom: [width, thickness, depth] → cut as width × depth
-      return { width: dimX, height: dimZ };
-      
-    default:
-      // Default: use two largest dimensions
-      const dims = [dimX, dimY, dimZ].sort((a, b) => b - a);
-      return { width: dims[0], height: dims[1] };
-  }
-}
+import { getFlatDimensions } from '../nesting/flatDimensions';
 
 /**
  * DXF export options
@@ -224,7 +174,7 @@ function createDogbones(dogbones: DogboneFillet[]): makerjs.IModel {
 /**
  * Generate Maker.js model for a single component
  */
-function generateComponentModel(
+export function generateComponentModel(
   component: Component,
   options: DXFExportOptions
 ): {

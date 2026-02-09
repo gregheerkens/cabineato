@@ -218,7 +218,7 @@ export function generateSidePanelFixedShelfDados(
         [frontOffset, dadoY],
         [d - rearOffset, dadoY],
       ],
-      purpose: 'dado',
+      purpose: 'fixed_shelf',
     };
     slots.push(slot);
   }

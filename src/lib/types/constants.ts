@@ -361,6 +361,37 @@ export const DEFAULT_ASSEMBLY_CONFIG: AssemblyConfig = {
 };
 
 // ============================================================================
+// Sheet Nesting Constants
+// ============================================================================
+
+/** Common CNC bed/sheet sizes in mm [width, height] */
+export const BED_SIZES = {
+  /** 4' x 4' CNC bed (1219mm x 1219mm) */
+  FOUR_BY_FOUR: [1219, 1219] as [number, number],
+  /** 4' x 8' full sheet (1219mm x 2438mm) */
+  FOUR_BY_EIGHT: [1219, 2438] as [number, number],
+} as const;
+
+/** Default values for sheet nesting */
+export const NESTING_DEFAULTS = {
+  /** Edge margin / safe zone from sheet edges in mm */
+  EDGE_MARGIN: 15,
+  /** Extra spacing added to kerf for part spacing comfort in mm */
+  COMFORT_MARGIN: 1,
+  /** Absolute minimum part spacing in mm */
+  MIN_PART_SPACING: 3,
+} as const;
+
+/** Default nesting configuration */
+export const DEFAULT_NESTING_CONFIG = {
+  bedSize: BED_SIZES.FOUR_BY_FOUR as [number, number],
+  edgeMargin: NESTING_DEFAULTS.EDGE_MARGIN,
+  partSpacing: BIT_DIAMETERS.QUARTER_INCH + NESTING_DEFAULTS.COMFORT_MARGIN,
+  allowRotation: true,
+  bitDiameter: BIT_DIAMETERS.QUARTER_INCH,
+} as const;
+
+// ============================================================================
 // Unit Conversion Helpers
 // ============================================================================
 
@@ -377,29 +408,37 @@ export function inchesToMm(inches: number): number {
   return inches * MM_PER_INCH;
 }
 
-/** Format mm as fractional inches (approximate) */
+/** Format mm as fractional inches (approximate to 1/32") */
 export function formatAsInches(mm: number): string {
   const inches = mmToInches(mm);
   const whole = Math.floor(inches);
   const fraction = inches - whole;
 
-  // Round to nearest 1/16"
-  const sixteenths = Math.round(fraction * 16);
+  // Round to nearest 1/32"
+  const thirtySeconds = Math.round(fraction * 32);
 
-  if (sixteenths === 0) {
+  if (thirtySeconds === 0) {
     return `${whole}"`;
-  } else if (sixteenths === 16) {
+  } else if (thirtySeconds === 32) {
     return `${whole + 1}"`;
-  } else if (sixteenths === 8) {
+  } else if (thirtySeconds === 16) {
     return whole > 0 ? `${whole}-1/2"` : `1/2"`;
-  } else if (sixteenths === 4) {
+  } else if (thirtySeconds === 8) {
     return whole > 0 ? `${whole}-1/4"` : `1/4"`;
-  } else if (sixteenths === 12) {
+  } else if (thirtySeconds === 24) {
     return whole > 0 ? `${whole}-3/4"` : `3/4"`;
+  } else if (thirtySeconds === 4) {
+    return whole > 0 ? `${whole}-1/8"` : `1/8"`;
+  } else if (thirtySeconds === 12) {
+    return whole > 0 ? `${whole}-3/8"` : `3/8"`;
+  } else if (thirtySeconds === 20) {
+    return whole > 0 ? `${whole}-5/8"` : `5/8"`;
+  } else if (thirtySeconds === 28) {
+    return whole > 0 ? `${whole}-7/8"` : `7/8"`;
   } else {
     // Reduce fraction
-    let num = sixteenths;
-    let den = 16;
+    let num = thirtySeconds;
+    let den = 32;
     while (num % 2 === 0) {
       num /= 2;
       den /= 2;
