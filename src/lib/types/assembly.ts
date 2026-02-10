@@ -60,7 +60,7 @@ export interface SlotFeature {
   /** Path defining the slot centerline */
   path: Vector2[];
   /** Purpose of the slot */
-  purpose?: 'back_panel' | 'fixed_shelf' | 'drawer_bottom';
+  purpose?: 'back_panel' | 'fixed_shelf' | 'drawer_bottom' | 'carcass_joint';
 }
 
 /** A rectangular notch (like toe kick) cut from a component */
@@ -111,7 +111,8 @@ export type ComponentRole =
   | 'drawer_side'
   | 'drawer_back'
   | 'drawer_bottom'
-  | 'toe_kick_panel';
+  | 'toe_kick_panel'
+  | 'runner_strip';
 
 /**
  * Component - Atomic unit representing a single panel/part
@@ -316,6 +317,23 @@ export interface ToeKickConfig {
   height: number;
   /** Depth of the notch in mm */
   depth: number;
+  /** Whether to generate the toe kick front panel (default true) */
+  generatePanel: boolean;
+}
+
+// ============================================================================
+// Carcass Joint Configuration
+// ============================================================================
+
+/** Carcass joint type for connecting top/bottom panels to side panels */
+export type CarcassJointType = 'butt' | 'rebate';
+
+/** Carcass joint configuration */
+export interface CarcassJointConfig {
+  /** Joint type: butt (default) or rebate (rabbet step on side panels) */
+  type: CarcassJointType;
+  /** Enable pocket hole registration marks on side panels */
+  pocketHoleMarks: boolean;
 }
 
 // ============================================================================
@@ -354,6 +372,7 @@ export interface AssemblyConfig {
     shelves: ShelfConfig;
     drawers: DrawerConfig;
     toeKick: ToeKickConfig;
+    carcassJoint: CarcassJointConfig;
   };
   /** Pre-drill configurations */
   predrills: {

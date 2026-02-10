@@ -54,6 +54,10 @@ function createTestConfig(overrides: Partial<AssemblyConfig> = {}): AssemblyConf
         ...DEFAULT_ASSEMBLY_CONFIG.features.toeKick,
         ...(overrides.features?.toeKick || {}),
       },
+      carcassJoint: {
+        ...DEFAULT_ASSEMBLY_CONFIG.features.carcassJoint,
+        ...(overrides.features?.carcassJoint || {}),
+      },
     },
   };
 }

@@ -169,12 +169,12 @@ export default function Home() {
                     <div>
                       <span className="text-gray-500">Overall Size:</span>
                       <br />
-                      <span className="font-medium">
+                      <span className="font-medium text-blue-600">
                         {config.globalBounds.w} × {config.globalBounds.h} ×{' '}
                         {config.globalBounds.d} mm
                       </span>
                       {showImperial && (
-                        <span className="text-xs text-gray-400 block">
+                        <span className="text-xs font-medium text-red-400 block">
                           {formatAsInches(config.globalBounds.w)} × {formatAsInches(config.globalBounds.h)} ×{' '}
                           {formatAsInches(config.globalBounds.d)}
                         </span>
@@ -183,12 +183,12 @@ export default function Home() {
                     <div>
                       <span className="text-gray-500">Interior Size:</span>
                       <br />
-                      <span className="font-medium">
+                      <span className="font-medium text-blue-600">
                         {assembly.interiorBounds.w} × {assembly.interiorBounds.h} ×{' '}
                         {assembly.interiorBounds.d} mm
                       </span>
                       {showImperial && (
-                        <span className="text-xs text-gray-400 block">
+                        <span className="text-xs font-medium text-red-400 block">
                           {formatAsInches(assembly.interiorBounds.w)} × {formatAsInches(assembly.interiorBounds.h)} ×{' '}
                           {formatAsInches(assembly.interiorBounds.d)}
                         </span>
@@ -204,14 +204,14 @@ export default function Home() {
                     <div>
                       <span className="text-gray-500">Material:</span>
                       <br />
-                      <span className="font-medium">
+                      <span className="font-medium text-blue-600">
                         {config.material.thickness}mm
-                        {showImperial && (
-                          <span className="text-xs text-gray-400 ml-1">
-                            ({formatAsInches(config.material.thickness)})
-                          </span>
-                        )}
                       </span>
+                      {showImperial && (
+                        <span className="text-xs font-medium text-red-400 ml-1">
+                          ({formatAsInches(config.material.thickness)})
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>

@@ -51,7 +51,7 @@ const COMPONENT_GROUPS: ComponentGroup[] = [
   },
   {
     name: 'Shelves',
-    roles: ['shelf'],
+    roles: ['shelf', 'runner_strip'],
   },
   {
     name: 'Drawer Components',

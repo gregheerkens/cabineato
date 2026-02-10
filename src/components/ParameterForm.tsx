@@ -11,6 +11,7 @@ import React, { useState, useCallback } from 'react';
 import type {
   AssemblyConfig,
   BackPanelType,
+  CarcassJointType,
   DrawerPullType,
   AdjustableShelfConfig,
   FixedShelfConfig,
@@ -66,11 +67,11 @@ function NumberInput({
           min={min}
           max={max}
           step={step}
-          className="w-24 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-24 px-2 py-1 border border-gray-300 rounded text-sm text-blue-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
-        <span className="text-sm text-gray-500">{unit}</span>
+        <span className="text-sm font-medium text-blue-600">{unit}</span>
         {showImperial && unit === 'mm' && (
-          <span className="text-xs text-gray-400">({formatAsInches(value)})</span>
+          <span className="text-sm font-medium text-red-400">{formatAsInches(value)}</span>
         )}
       </div>
     </div>
@@ -250,6 +251,18 @@ export function ParameterForm({
     [config.features, updateConfig]
   );
 
+  const updateCarcassJoint = useCallback(
+    (updates: Partial<typeof config.features.carcassJoint>) => {
+      updateConfig({
+        features: {
+          ...config.features,
+          carcassJoint: { ...config.features.carcassJoint, ...updates },
+        },
+      });
+    },
+    [config.features, updateConfig]
+  );
+
   const updateSecondaryMaterial = useCallback(
     (updates: Partial<NonNullable<typeof config.secondaryMaterial>>) => {
       updateConfig({
@@ -411,7 +424,7 @@ export function ParameterForm({
 
       {/* Dimensions Section */}
       <Section title="Dimensions">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="flex flex-col gap-3">
           <NumberInput
             label="Width"
             value={config.globalBounds.w}
@@ -497,6 +510,27 @@ export function ParameterForm({
             />
           </div>
         </div>
+      </Section>
+
+      {/* Carcass Joints Section */}
+      <Section title="Carcass Joints" defaultOpen={false}>
+        <SelectInput
+          label="Joint Type"
+          value={config.features.carcassJoint.type}
+          onChange={(v) => updateCarcassJoint({ type: v as CarcassJointType })}
+          options={[
+            { value: 'butt', label: 'Butt Joint' },
+            { value: 'rebate', label: 'Rebate (Rabbet)' },
+          ]}
+        />
+        <Toggle
+          label="Pocket Hole Registration Marks"
+          checked={config.features.carcassJoint.pocketHoleMarks}
+          onChange={(v) => updateCarcassJoint({ pocketHoleMarks: v })}
+        />
+        <p className="text-xs text-gray-500 -mt-2">
+          Through-drill points on side panels for Kreg jig alignment
+        </p>
       </Section>
 
       {/* Back Panel Section */}
@@ -823,22 +857,29 @@ export function ParameterForm({
           onChange={(v) => updateToeKick({ enabled: v })}
         />
         {config.features.toeKick.enabled && (
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            <NumberInput
-              label="Height"
-              value={config.features.toeKick.height}
-              onChange={(v) => updateToeKick({ height: v })}
-              min={50}
-              max={200}
-              showImperial={showImperial}
-            />
-            <NumberInput
-              label="Depth"
-              value={config.features.toeKick.depth}
-              onChange={(v) => updateToeKick({ depth: v })}
-              min={25}
-              max={150}
-              showImperial={showImperial}
+          <div className="space-y-4 mt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <NumberInput
+                label="Height"
+                value={config.features.toeKick.height}
+                onChange={(v) => updateToeKick({ height: v })}
+                min={50}
+                max={200}
+                showImperial={showImperial}
+              />
+              <NumberInput
+                label="Depth"
+                value={config.features.toeKick.depth}
+                onChange={(v) => updateToeKick({ depth: v })}
+                min={25}
+                max={150}
+                showImperial={showImperial}
+              />
+            </div>
+            <Toggle
+              label="Generate Front Panel"
+              checked={config.features.toeKick.generatePanel}
+              onChange={(v) => updateToeKick({ generatePanel: v })}
             />
           </div>
         )}

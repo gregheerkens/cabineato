@@ -43,6 +43,20 @@ function getDrawerBottomThickness(config: AssemblyConfig): number {
 }
 
 /**
+ * Get the effective slide width (clearance per side).
+ * When shelf runners are active, the runner strip thickness (= material thickness)
+ * replaces the ball-bearing slide clearance.
+ */
+function getEffectiveSlideWidth(config: AssemblyConfig): number {
+  const { features } = config;
+  const runnerConfig = 'runners' in features.shelves ? features.shelves.runners : undefined;
+  if (runnerConfig?.enabled && runnerConfig.positions.length > 0) {
+    return config.material.thickness;
+  }
+  return features.drawers.slideWidth;
+}
+
+/**
  * Calculate drawer box dimensions
  */
 export interface DrawerBoxDimensions {
@@ -71,7 +85,7 @@ export function calculateDrawerDimensions(
   const { globalBounds, features, backPanel } = config;
   const interior = calculateInteriorBounds(config);
 
-  const slideWidth = features.drawers.slideWidth;
+  const slideWidth = getEffectiveSlideWidth(config);
   const overlayAmount = features.drawers.overlayAmount;
 
   // Box exterior width = interior width - (2 * slide clearance)
@@ -236,7 +250,7 @@ export function generateDrawerSides(
 
   const toeKickHeight = features.toeKick.enabled ? features.toeKick.height : 0;
   const drawerGap = 3;
-  const slideWidth = features.drawers.slideWidth;
+  const slideWidth = getEffectiveSlideWidth(config);
 
   // Y position of drawer box
   const boxPosY =
@@ -304,7 +318,7 @@ export function generateDrawerBack(
 
   const toeKickHeight = features.toeKick.enabled ? features.toeKick.height : 0;
   const drawerGap = 3;
-  const slideWidth = features.drawers.slideWidth;
+  const slideWidth = getEffectiveSlideWidth(config);
 
   // Y position of drawer box
   const boxPosY =
@@ -346,7 +360,7 @@ export function generateDrawerBottom(
 
   const toeKickHeight = features.toeKick.enabled ? features.toeKick.height : 0;
   const drawerGap = 3;
-  const slideWidth = features.drawers.slideWidth;
+  const slideWidth = getEffectiveSlideWidth(config);
 
   // Y position of drawer box
   const boxPosY =

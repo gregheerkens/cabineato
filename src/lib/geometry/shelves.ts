@@ -425,13 +425,70 @@ export function generateFixedShelves(config: AssemblyConfig): Component[] {
 }
 
 /**
- * Generate all shelf components (both adjustable and fixed)
+ * Generate runner strip components (left + right pair per position)
+ *
+ * Runner strips are wooden strips screwed to the side panels as a
+ * low-cost alternative to ball-bearing drawer slides.
+ */
+export function generateRunnerStrips(config: AssemblyConfig): Component[] {
+  const { globalBounds, material, features } = config;
+  const thickness = material.thickness;
+
+  const runnerConfig = getRunnerConfig(features.shelves);
+  if (!runnerConfig?.enabled || runnerConfig.positions.length === 0) {
+    return [];
+  }
+
+  const strips: Component[] = [];
+  const stripWidth = SHELF_RUNNER_DEFAULTS.STRIP_WIDTH;
+  const frontSetback = runnerConfig.frontSetback ?? SHELF_RUNNER_DEFAULTS.FRONT_SETBACK;
+  const rearSetback = runnerConfig.rearSetback ?? SHELF_RUNNER_DEFAULTS.REAR_SETBACK;
+  const runnerLength = globalBounds.d - frontSetback - rearSetback;
+  const toeKickHeight = features.toeKick.enabled ? features.toeKick.height : 0;
+
+  for (let i = 0; i < runnerConfig.positions.length; i++) {
+    const position = runnerConfig.positions[i];
+    const posY = toeKickHeight + thickness + position;
+
+    // Left strip
+    strips.push({
+      id: `runner_strip_left_${i + 1}`,
+      label: `Runner Strip L${i + 1}`,
+      role: 'runner_strip',
+      dimensions: [stripWidth, runnerLength, thickness],
+      position: [thickness, posY, frontSetback],
+      rotation: [0, 0, 0],
+      features: [],
+      layer: 'OUTSIDE_CUT',
+      materialThickness: thickness,
+    });
+
+    // Right strip
+    strips.push({
+      id: `runner_strip_right_${i + 1}`,
+      label: `Runner Strip R${i + 1}`,
+      role: 'runner_strip',
+      dimensions: [stripWidth, runnerLength, thickness],
+      position: [globalBounds.w - thickness - stripWidth, posY, frontSetback],
+      rotation: [0, 0, 0],
+      features: [],
+      layer: 'OUTSIDE_CUT',
+      materialThickness: thickness,
+    });
+  }
+
+  return strips;
+}
+
+/**
+ * Generate all shelf components (adjustable, fixed, and runner strips)
  */
 export function generateShelves(config: AssemblyConfig): Component[] {
   const components: Component[] = [];
 
   components.push(...generateAdjustableShelves(config));
   components.push(...generateFixedShelves(config));
+  components.push(...generateRunnerStrips(config));
 
   return components;
 }

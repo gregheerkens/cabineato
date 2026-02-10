@@ -308,6 +308,10 @@ export function recalculateAssembly(
         ...assembly.config.features.toeKick,
         ...(newConfig.features?.toeKick || {}),
       },
+      carcassJoint: {
+        ...assembly.config.features.carcassJoint,
+        ...(newConfig.features?.carcassJoint || {}),
+      },
     },
   };
 

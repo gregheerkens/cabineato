@@ -52,6 +52,9 @@ export function getFlatDimensions(component: Component): { width: number; height
     case 'toe_kick_panel':
       return { width: dimX, height: dimY };
 
+    case 'runner_strip':
+      return { width: dimX, height: dimY };
+
     default: {
       const dims = [dimX, dimY, dimZ].sort((a, b) => b - a);
       return { width: dims[0], height: dims[1] };

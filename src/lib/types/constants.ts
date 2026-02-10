@@ -19,6 +19,7 @@ import type {
   DrawerConfig,
   DrawerPullConfig,
   ToeKickConfig,
+  CarcassJointConfig,
   AssemblyPredrillConfig,
   SlidePredrillConfig,
 } from './assembly';
@@ -149,6 +150,15 @@ export const ASSEMBLY_PREDRILL_DEFAULTS = {
 } as const;
 
 // ============================================================================
+// Pocket Hole Constants
+// ============================================================================
+
+export const POCKET_HOLE_DEFAULTS = {
+  /** Registration mark diameter in mm (3mm through-drill point) */
+  MARK_DIAMETER: 3,
+} as const;
+
+// ============================================================================
 // Slide Hardware Constants
 // ============================================================================
 
@@ -176,6 +186,8 @@ export const SHELF_RUNNER_DEFAULTS = {
   REAR_SETBACK: 50,
   /** Number of holes per runner */
   HOLES_PER_RUNNER: 2,
+  /** Cross-section width of the runner strip in mm */
+  STRIP_WIDTH: 20,
 } as const;
 
 // ============================================================================
@@ -316,6 +328,13 @@ export const DEFAULT_TOE_KICK: ToeKickConfig = {
   enabled: true,
   height: TOE_KICK_DEFAULTS.HEIGHT,
   depth: TOE_KICK_DEFAULTS.DEPTH,
+  generatePanel: true,
+};
+
+/** Default carcass joint configuration */
+export const DEFAULT_CARCASS_JOINT: CarcassJointConfig = {
+  type: 'butt',
+  pocketHoleMarks: false,
 };
 
 /** Default assembly pre-drill configuration */
@@ -353,6 +372,7 @@ export const DEFAULT_ASSEMBLY_CONFIG: AssemblyConfig = {
     shelves: DEFAULT_SHELVES,
     drawers: DEFAULT_DRAWERS,
     toeKick: DEFAULT_TOE_KICK,
+    carcassJoint: DEFAULT_CARCASS_JOINT,
   },
   predrills: {
     assembly: DEFAULT_ASSEMBLY_PREDRILLS,

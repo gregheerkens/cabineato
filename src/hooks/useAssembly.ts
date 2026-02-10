@@ -97,6 +97,10 @@ export function useAssembly(
           ...prev.features.toeKick,
           ...(updates.features?.toeKick || {}),
         },
+        carcassJoint: {
+          ...prev.features.carcassJoint,
+          ...(updates.features?.carcassJoint || {}),
+        },
       },
     }));
   }, []);

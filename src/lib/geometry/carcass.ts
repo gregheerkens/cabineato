@@ -19,11 +19,12 @@ import type {
   NotchFeature,
   HoleFeature,
   CountersinkFeature,
+  SlotFeature,
   Vector3,
   AssemblyPredrillConfig,
   SlidePredrillConfig,
 } from '../types';
-import { ASSEMBLY_PREDRILL_DEFAULTS, SLIDE_HARDWARE_DEFAULTS, DRAWER_DEFAULTS } from '../types/constants';
+import { ASSEMBLY_PREDRILL_DEFAULTS, SLIDE_HARDWARE_DEFAULTS, DRAWER_DEFAULTS, POCKET_HOLE_DEFAULTS } from '../types/constants';
 
 /**
  * Generate a unique ID for a component
@@ -241,6 +242,133 @@ export function generateSidePanelSlidePredrills(
 }
 
 /**
+ * Generate rabbet slots on a side panel for rebate joints
+ *
+ * When the joint type is 'rebate', a step (rabbet) is cut into the top and bottom
+ * edges of each side panel. The rabbet is materialThickness wide x thickness/2 deep.
+ *
+ * @param config - Assembly configuration
+ * @param panelHeight - Height of the side panel
+ * @param panelDepth - Depth of the side panel
+ * @returns Array of slot features for the rabbets
+ */
+export function generateSidePanelRabbets(
+  config: AssemblyConfig,
+  panelHeight: number,
+  panelDepth: number
+): SlotFeature[] {
+  if (config.features.carcassJoint.type !== 'rebate') {
+    return [];
+  }
+
+  const thickness = config.material.thickness;
+  const rabbetDepth = thickness / 2;
+  const toeKickHeight = config.features.toeKick.enabled ? config.features.toeKick.height : 0;
+  const slots: SlotFeature[] = [];
+
+  // Top rabbet: slot at top edge of side panel
+  // Path runs along the depth axis at the top of the panel
+  const topRabbetY = panelHeight - thickness / 2;
+  slots.push({
+    type: 'slot',
+    width: thickness,
+    depth: rabbetDepth,
+    path: [
+      [0, topRabbetY],
+      [panelDepth, topRabbetY],
+    ],
+    purpose: 'carcass_joint',
+  });
+
+  // Bottom rabbet: slot at bottom edge (above toe kick if present)
+  const bottomRabbetY = toeKickHeight + thickness / 2;
+  slots.push({
+    type: 'slot',
+    width: thickness,
+    depth: rabbetDepth,
+    path: [
+      [0, bottomRabbetY],
+      [panelDepth, bottomRabbetY],
+    ],
+    purpose: 'carcass_joint',
+  });
+
+  return slots;
+}
+
+/**
+ * Generate pocket hole registration marks on a side panel
+ *
+ * These are small through-drill points on the inside face of the side panel
+ * showing where a 15-degree pocket screw would emerge halfway through the
+ * mating (top/bottom) panel. The Y offset from the joint seam is:
+ *   (thickness / 2) / tan(15 degrees)
+ *
+ * @param config - Assembly configuration
+ * @param panelHeight - Height of the side panel
+ * @param panelDepth - Depth of the side panel
+ * @returns Array of hole features for the registration marks
+ */
+export function generatePocketHoleMarks(
+  config: AssemblyConfig,
+  panelHeight: number,
+  panelDepth: number
+): HoleFeature[] {
+  if (!config.features.carcassJoint.pocketHoleMarks) {
+    return [];
+  }
+
+  const thickness = config.material.thickness;
+  const toeKickHeight = config.features.toeKick.enabled ? config.features.toeKick.height : 0;
+
+  // Pocket screw angle offset: (thickness/2) / tan(15deg)
+  const pocketOffset = (thickness / 2) / Math.tan((15 * Math.PI) / 180);
+
+  // Top marks: below the top panel inner face
+  const topMarkY = panelHeight - thickness - pocketOffset;
+  // Bottom marks: above the bottom panel inner face
+  const bottomMarkY = toeKickHeight + thickness + pocketOffset;
+
+  // Reuse assembly predrill spacing for hole positions along depth
+  const edgeDistance = ASSEMBLY_PREDRILL_DEFAULTS.EDGE_DISTANCE;
+  const screwSpacing = ASSEMBLY_PREDRILL_DEFAULTS.SCREW_SPACING;
+  const markDiameter = POCKET_HOLE_DEFAULTS.MARK_DIAMETER;
+
+  // Calculate X positions along the depth axis
+  const startX = edgeDistance;
+  const endX = panelDepth - edgeDistance;
+  const availableLength = endX - startX;
+  const numIntervals = Math.max(1, Math.floor(availableLength / screwSpacing));
+  const actualSpacing = availableLength / numIntervals;
+
+  const holes: HoleFeature[] = [];
+
+  for (let i = 0; i <= numIntervals; i++) {
+    const xPos = startX + i * actualSpacing;
+
+    // Top pocket hole mark
+    holes.push({
+      type: 'hole',
+      pos: [xPos, topMarkY],
+      diameter: markDiameter,
+      depth: 0, // through hole
+      purpose: 'assembly',
+    });
+
+    // Bottom pocket hole mark
+    holes.push({
+      type: 'hole',
+      pos: [xPos, bottomMarkY],
+      diameter: markDiameter,
+      depth: 0, // through hole
+      purpose: 'assembly',
+    });
+  }
+
+  return holes;
+}
+
+/**
  * Generate the left side panel
  */
 export function generateLeftSidePanel(config: AssemblyConfig): Component {
@@ -266,6 +394,14 @@ export function generateLeftSidePanel(config: AssemblyConfig): Component {
     };
     panelFeatures.push(notch);
   }
+
+  // Add rebate joint slots if configured
+  const rabbetSlots = generateSidePanelRabbets(config, panelHeight, panelDepth);
+  panelFeatures.push(...rabbetSlots);
+
+  // Add pocket hole registration marks if enabled
+  const pocketHoleMarks = generatePocketHoleMarks(config, panelHeight, panelDepth);
+  panelFeatures.push(...pocketHoleMarks);
 
   // Add assembly pre-drills if enabled
   const assemblyPredrills = generateSidePanelAssemblyPredrills(
@@ -323,6 +459,14 @@ export function generateRightSidePanel(config: AssemblyConfig): Component {
     };
     panelFeatures.push(notch);
   }
+
+  // Add rebate joint slots if configured
+  const rabbetSlots = generateSidePanelRabbets(config, panelHeight, panelDepth);
+  panelFeatures.push(...rabbetSlots);
+
+  // Add pocket hole registration marks if enabled
+  const pocketHoleMarks = generatePocketHoleMarks(config, panelHeight, panelDepth);
+  panelFeatures.push(...pocketHoleMarks);
 
   // Add assembly pre-drills if enabled
   const assemblyPredrills = generateSidePanelAssemblyPredrills(
@@ -429,7 +573,7 @@ export function generateBottomPanel(config: AssemblyConfig): Component {
  */
 export function generateToeKickPanel(config: AssemblyConfig): Component | null {
   const { globalBounds, material, features } = config;
-  if (!features.toeKick.enabled) return null;
+  if (!features.toeKick.enabled || !features.toeKick.generatePanel) return null;
 
   const thickness = material.thickness;
   const panelWidth = globalBounds.w - 2 * thickness;

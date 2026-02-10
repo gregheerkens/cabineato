@@ -32,6 +32,7 @@ const ROLE_COLORS: Record<ComponentRole, string> = {
   drawer_back: '#a855f7',       // purple
   drawer_bottom: '#a855f7',     // purple
   toe_kick_panel: '#A0522D',   // sienna
+  runner_strip: '#f97316',     // orange
 };
 
 function getPartColor(role: ComponentRole): string {

@@ -25,7 +25,7 @@ const GROUPS: { name: string; roles: ComponentRole[] }[] = [
     roles: ['side_panel_left', 'side_panel_right', 'top_panel', 'bottom_panel'],
   },
   { name: 'Back', roles: ['back_panel'] },
-  { name: 'Shelves', roles: ['shelf'] },
+  { name: 'Shelves', roles: ['shelf', 'runner_strip'] },
   {
     name: 'Drawers',
     roles: ['drawer_front', 'drawer_side', 'drawer_back', 'drawer_bottom'],
