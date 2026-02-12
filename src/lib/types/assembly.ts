@@ -220,12 +220,15 @@ export interface FixedShelfConfig {
   useSecondaryMaterial: boolean;
 }
 
-/** Shelf runner configuration (for simple wooden runners) */
+/** Drawer runner mode */
+export type DrawerRunnerMode = 'full_width' | 'matching';
+
+/** Drawer runner configuration (wooden strips as alternative to ball-bearing slides) */
 export interface ShelfRunnerConfig {
-  /** Whether to generate shelf runner mounting holes */
+  /** Whether to generate drawer runners */
   enabled: boolean;
-  /** Positions of runner shelves from bottom (in mm) */
-  positions: number[];
+  /** Runner mode: full_width (drawer slides on wall runners) or matching (wall + drawer runners) */
+  mode: DrawerRunnerMode;
   /** Distance from front edge to runner in mm */
   frontSetback: number;
   /** Distance from rear edge to runner in mm */

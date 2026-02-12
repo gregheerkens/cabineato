@@ -12,6 +12,7 @@ import type {
   AssemblyConfig,
   BackPanelType,
   CarcassJointType,
+  DrawerRunnerMode,
   DrawerPullType,
   AdjustableShelfConfig,
   FixedShelfConfig,
@@ -405,18 +406,11 @@ export function ParameterForm({
   const [fixedPositionsInput, setFixedPositionsInput] = useState(
     (fixed?.positions ?? []).join(', ')
   );
-  const [runnerPositionsInput, setRunnerPositionsInput] = useState(
-    (runners?.positions ?? []).join(', ')
-  );
 
   // Sync local state when external config changes
   React.useEffect(() => {
     setFixedPositionsInput((fixed?.positions ?? []).join(', '));
   }, [fixed?.positions]);
-
-  React.useEffect(() => {
-    setRunnerPositionsInput((runners?.positions ?? []).join(', '));
-  }, [runners?.positions]);
 
   return (
     <div className="space-y-4 p-4 bg-white rounded-lg shadow-sm">
@@ -686,58 +680,6 @@ export function ParameterForm({
         )}
       </Section>
 
-      {/* Shelf Runners Section */}
-      <Section title="Shelf Runners" defaultOpen={false}>
-        <Toggle
-          label="Enable Shelf Runners"
-          checked={runners?.enabled ?? false}
-          onChange={(v) => updateShelfRunners({ enabled: v })}
-        />
-        {runners?.enabled && (
-          <div className="space-y-4 mt-4">
-            <p className="text-xs text-gray-500">
-              Shelf runners are wooden strips screwed to the side panels.
-              Enter positions as heights from the bottom interior (in mm), comma-separated.
-            </p>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-gray-700">Runner Positions (mm from bottom)</label>
-              <input
-                type="text"
-                value={runnerPositionsInput}
-                onChange={(e) => setRunnerPositionsInput(e.target.value)}
-                onBlur={() => {
-                  const positions = runnerPositionsInput
-                    .split(',')
-                    .map((s) => parseFloat(s.trim()))
-                    .filter((n) => !isNaN(n) && n >= 0);
-                  updateShelfRunners({ positions });
-                }}
-                placeholder="e.g. 150, 350"
-                className="px-2 py-1 border border-gray-300 rounded text-sm bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <NumberInput
-                label="Front Setback"
-                value={runners.frontSetback ?? 50}
-                onChange={(v) => updateShelfRunners({ frontSetback: v })}
-                min={20}
-                max={100}
-                showImperial={showImperial}
-              />
-              <NumberInput
-                label="Holes Per Runner"
-                value={runners.holesPerRunner ?? 3}
-                onChange={(v) => updateShelfRunners({ holesPerRunner: v })}
-                min={2}
-                max={6}
-                unit="holes"
-              />
-            </div>
-          </div>
-        )}
-      </Section>
-
       {/* Drawers Section */}
       <Section title="Drawers" defaultOpen={false}>
         <Toggle
@@ -758,21 +700,10 @@ export function ParameterForm({
                 ...next.predrills,
                 slides: { ...next.predrills?.slides, enabled: true },
               };
-              // Auto-disable shelf runners
-              const shelves = next.features.shelves;
-              if ('runners' in shelves && shelves.runners) {
-                next.features = {
-                  ...next.features,
-                  shelves: { ...shelves, runners: { ...shelves.runners, enabled: false } },
-                };
-              }
             }
             onChange(next);
           }}
         />
-        <p className="text-xs text-gray-500 -mt-2">
-          Enables slide pre-drills; disables shelf runners
-        </p>
         {config.features.drawers.enabled && (
           <div className="space-y-4 mt-4">
             <div className="grid grid-cols-2 gap-4">
@@ -784,15 +715,17 @@ export function ParameterForm({
                 max={8}
                 unit="drawers"
               />
-              <NumberInput
-                label="Slide Clearance"
-                value={config.features.drawers.slideWidth}
-                onChange={(v) => updateDrawers({ slideWidth: v })}
-                min={10}
-                max={20}
-                step={0.1}
-                showImperial={showImperial}
-              />
+              {!(runners?.enabled) && (
+                <NumberInput
+                  label="Slide Clearance"
+                  value={config.features.drawers.slideWidth}
+                  onChange={(v) => updateDrawers({ slideWidth: v })}
+                  min={10}
+                  max={20}
+                  step={0.1}
+                  showImperial={showImperial}
+                />
+              )}
             </div>
 
             {/* Drawer Pull Holes */}
@@ -841,6 +774,40 @@ export function ParameterForm({
                       { value: String(DRAWER_PULL_DEFAULTS.SPACING_128MM), label: '128mm (5")' },
                       { value: String(DRAWER_PULL_DEFAULTS.SPACING_160MM), label: '160mm (6.3")' },
                     ]}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Drawer Runners */}
+            <div className="border-t pt-4">
+              <h4 className="text-sm font-medium text-gray-600 mb-3">Drawer Runners</h4>
+              <Toggle
+                label="Use Wooden Runners"
+                checked={runners?.enabled ?? false}
+                onChange={(v) => updateShelfRunners({ enabled: v })}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Wooden strips as alternative to ball-bearing slides. One pair per drawer, auto-positioned.
+              </p>
+              {runners?.enabled && (
+                <div className="space-y-3 mt-3">
+                  <SelectInput
+                    label="Runner Mode"
+                    value={runners.mode ?? 'full_width'}
+                    onChange={(v) => updateShelfRunners({ mode: v as DrawerRunnerMode })}
+                    options={[
+                      { value: 'full_width', label: 'Full Width (drawer slides on runners)' },
+                      { value: 'matching', label: 'Matching (wall + drawer runners)' },
+                    ]}
+                  />
+                  <NumberInput
+                    label="Front Setback"
+                    value={runners.frontSetback ?? 50}
+                    onChange={(v) => updateShelfRunners({ frontSetback: v })}
+                    min={20}
+                    max={100}
+                    showImperial={showImperial}
                   />
                 </div>
               )}

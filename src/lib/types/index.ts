@@ -23,6 +23,7 @@ export type {
   BackPanelConfig,
   AdjustableShelfConfig,
   FixedShelfConfig,
+  DrawerRunnerMode,
   ShelfRunnerConfig,
   ShelfConfig,
   DrawerPullType,

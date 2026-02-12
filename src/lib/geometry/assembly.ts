@@ -194,7 +194,7 @@ function generateCarcassWithFeatures(config: AssemblyConfig): Component[] {
 
   // Add shelf runner holes to side panels
   const runnerConfig = 'runners' in shelfConfig ? shelfConfig.runners : undefined;
-  if (runnerConfig?.enabled && runnerConfig.positions.length > 0) {
+  if (runnerConfig?.enabled) {
     const leftRunnerHoles = generateSidePanelRunnerHoles(config, 'left');
     const rightRunnerHoles = generateSidePanelRunnerHoles(config, 'right');
 

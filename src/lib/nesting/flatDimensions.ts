@@ -53,7 +53,7 @@ export function getFlatDimensions(component: Component): { width: number; height
       return { width: dimX, height: dimY };
 
     case 'runner_strip':
-      return { width: dimX, height: dimY };
+      return { width: dimZ, height: dimX };
 
     default: {
       const dims = [dimX, dimY, dimZ].sort((a, b) => b - a);

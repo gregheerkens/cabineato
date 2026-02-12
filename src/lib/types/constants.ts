@@ -188,6 +188,8 @@ export const SHELF_RUNNER_DEFAULTS = {
   HOLES_PER_RUNNER: 2,
   /** Cross-section width of the runner strip in mm */
   STRIP_WIDTH: 20,
+  /** Per-side clearance for full-width runner mode in mm */
+  FULL_WIDTH_CLEARANCE: 2,
 } as const;
 
 // ============================================================================
@@ -291,7 +293,7 @@ export const DEFAULT_FIXED_SHELVES: FixedShelfConfig = {
 /** Default shelf runner configuration */
 export const DEFAULT_SHELF_RUNNERS: ShelfRunnerConfig = {
   enabled: false,
-  positions: [],
+  mode: 'full_width',
   frontSetback: SHELF_RUNNER_DEFAULTS.FRONT_SETBACK,
   rearSetback: SHELF_RUNNER_DEFAULTS.REAR_SETBACK,
   holeDiameter: SHELF_RUNNER_DEFAULTS.HOLE_DIAMETER,

@@ -19,7 +19,7 @@ import type {
   HoleFeature,
   DrawerPullConfig,
 } from '../types';
-import { DRAWER_DEFAULTS, MATERIAL_THICKNESSES, DRAWER_PULL_DEFAULTS } from '../types/constants';
+import { DRAWER_DEFAULTS, MATERIAL_THICKNESSES, DRAWER_PULL_DEFAULTS, SHELF_RUNNER_DEFAULTS } from '../types/constants';
 import { calculateInteriorBounds } from './carcass';
 
 /** Drawer box material thickness (typically 1/2" / 12.7mm) */
@@ -44,14 +44,19 @@ function getDrawerBottomThickness(config: AssemblyConfig): number {
 
 /**
  * Get the effective slide width (clearance per side).
- * When shelf runners are active, the runner strip thickness (= material thickness)
- * replaces the ball-bearing slide clearance.
+ *
+ * - Ball-bearing slides: uses configured slideWidth (e.g. 12.7mm)
+ * - Full-width runners: small clearance only (drawer rides on top of runners)
+ * - Matching runners: wall runner stripWidth (drawer runners fill the gap)
  */
 function getEffectiveSlideWidth(config: AssemblyConfig): number {
   const { features } = config;
   const runnerConfig = 'runners' in features.shelves ? features.shelves.runners : undefined;
-  if (runnerConfig?.enabled && runnerConfig.positions.length > 0) {
-    return config.material.thickness;
+  if (runnerConfig?.enabled && features.drawers.enabled) {
+    if (runnerConfig.mode === 'matching') {
+      return SHELF_RUNNER_DEFAULTS.STRIP_WIDTH;
+    }
+    return SHELF_RUNNER_DEFAULTS.FULL_WIDTH_CLEARANCE;
   }
   return features.drawers.slideWidth;
 }

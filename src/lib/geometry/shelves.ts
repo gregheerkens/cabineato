@@ -227,50 +227,72 @@ export function generateSidePanelFixedShelfDados(
 }
 
 /**
+ * Calculate the Y positions of each drawer's bottom edge (for runner placement).
+ * Returns one Y value per drawer.
+ */
+function calculateDrawerBottomPositions(config: AssemblyConfig): number[] {
+  const { globalBounds, material, features } = config;
+  if (!features.drawers.enabled || features.drawers.count <= 0) {
+    return [];
+  }
+
+  const thickness = material.thickness;
+  const toeKickHeight = features.toeKick.enabled ? features.toeKick.height : 0;
+  const drawerCount = features.drawers.count;
+
+  // Interior height (same as calculateInteriorBounds)
+  const interiorHeight = globalBounds.h - 2 * thickness - toeKickHeight;
+
+  const drawerGap = 3;
+  const totalGaps = drawerCount - 1;
+  const heightForDrawers = interiorHeight - totalGaps * drawerGap;
+  const drawerFrontHeight = heightForDrawers / drawerCount;
+
+  const positions: number[] = [];
+  for (let i = 0; i < drawerCount; i++) {
+    const drawerBottomY = toeKickHeight + thickness + i * (drawerFrontHeight + drawerGap);
+    positions.push(drawerBottomY);
+  }
+  return positions;
+}
+
+/**
  * Generate shelf runner mounting holes on a side panel
  *
- * @param config - Assembly configuration
- * @param side - Which side panel
- * @returns Array of hole features for runner mounting
+ * Auto-positions from drawer layout — one set of holes per drawer.
  */
 export function generateSidePanelRunnerHoles(
   config: AssemblyConfig,
   side: 'left' | 'right'
 ): HoleFeature[] {
-  const { globalBounds, material, features } = config;
-  const { d, h } = globalBounds;
-  const thickness = material.thickness;
+  const { globalBounds, features } = config;
+  const { d } = globalBounds;
 
   const runnerConfig = getRunnerConfig(features.shelves);
-  if (!runnerConfig?.enabled || runnerConfig.positions.length === 0) {
+  if (!runnerConfig?.enabled || !features.drawers.enabled) {
     return [];
   }
 
   const holes: HoleFeature[] = [];
+  const drawerBottomPositions = calculateDrawerBottomPositions(config);
 
-  const toeKickHeight = features.toeKick.enabled ? features.toeKick.height : 0;
   const frontSetback = runnerConfig.frontSetback ?? SHELF_RUNNER_DEFAULTS.FRONT_SETBACK;
   const rearSetback = runnerConfig.rearSetback ?? SHELF_RUNNER_DEFAULTS.REAR_SETBACK;
   const holeDiameter = runnerConfig.holeDiameter ?? SHELF_RUNNER_DEFAULTS.HOLE_DIAMETER;
   const holesPerRunner = runnerConfig.holesPerRunner ?? SHELF_RUNNER_DEFAULTS.HOLES_PER_RUNNER;
 
-  // Calculate hole spacing along the runner length
   const runnerLength = d - frontSetback - rearSetback;
   const holeSpacing = runnerLength / (holesPerRunner - 1);
 
-  for (const position of runnerConfig.positions) {
-    // Position is specified as height from interior bottom
-    const runnerY = toeKickHeight + thickness + position;
-
-    // Generate holes along the runner
+  for (const drawerBottomY of drawerBottomPositions) {
     for (let i = 0; i < holesPerRunner; i++) {
       const holeX = frontSetback + i * holeSpacing;
 
       holes.push({
         type: 'hole',
-        pos: [holeX, runnerY],
+        pos: [holeX, drawerBottomY],
         diameter: holeDiameter,
-        depth: 0, // 0 = through hole
+        depth: 0,
         purpose: 'shelf_runner',
       });
     }
@@ -425,17 +447,22 @@ export function generateFixedShelves(config: AssemblyConfig): Component[] {
 }
 
 /**
- * Generate runner strip components (left + right pair per position)
+ * Generate runner strip components, auto-positioned per drawer.
  *
- * Runner strips are wooden strips screwed to the side panels as a
- * low-cost alternative to ball-bearing drawer slides.
+ * - Both modes: one pair of wall runners (left + right) per drawer
+ * - Matching mode: also generates one pair of drawer-side runners per drawer
  */
 export function generateRunnerStrips(config: AssemblyConfig): Component[] {
   const { globalBounds, material, features } = config;
   const thickness = material.thickness;
 
   const runnerConfig = getRunnerConfig(features.shelves);
-  if (!runnerConfig?.enabled || runnerConfig.positions.length === 0) {
+  if (!runnerConfig?.enabled || !features.drawers.enabled) {
+    return [];
+  }
+
+  const drawerBottomPositions = calculateDrawerBottomPositions(config);
+  if (drawerBottomPositions.length === 0) {
     return [];
   }
 
@@ -443,19 +470,17 @@ export function generateRunnerStrips(config: AssemblyConfig): Component[] {
   const stripWidth = SHELF_RUNNER_DEFAULTS.STRIP_WIDTH;
   const frontSetback = runnerConfig.frontSetback ?? SHELF_RUNNER_DEFAULTS.FRONT_SETBACK;
   const rearSetback = runnerConfig.rearSetback ?? SHELF_RUNNER_DEFAULTS.REAR_SETBACK;
-  const runnerLength = globalBounds.d - frontSetback - rearSetback;
-  const toeKickHeight = features.toeKick.enabled ? features.toeKick.height : 0;
+  const wallRunnerLength = globalBounds.d - frontSetback - rearSetback;
 
-  for (let i = 0; i < runnerConfig.positions.length; i++) {
-    const position = runnerConfig.positions[i];
-    const posY = toeKickHeight + thickness + position;
+  for (let i = 0; i < drawerBottomPositions.length; i++) {
+    const posY = drawerBottomPositions[i];
 
-    // Left strip
+    // Wall runner — left side, runs front-to-back along Z axis
     strips.push({
-      id: `runner_strip_left_${i + 1}`,
-      label: `Runner Strip L${i + 1}`,
+      id: `wall_runner_left_${i + 1}`,
+      label: `Wall Runner L${i + 1}`,
       role: 'runner_strip',
-      dimensions: [stripWidth, runnerLength, thickness],
+      dimensions: [stripWidth, thickness, wallRunnerLength],
       position: [thickness, posY, frontSetback],
       rotation: [0, 0, 0],
       features: [],
@@ -463,18 +488,51 @@ export function generateRunnerStrips(config: AssemblyConfig): Component[] {
       materialThickness: thickness,
     });
 
-    // Right strip
+    // Wall runner — right side
     strips.push({
-      id: `runner_strip_right_${i + 1}`,
-      label: `Runner Strip R${i + 1}`,
+      id: `wall_runner_right_${i + 1}`,
+      label: `Wall Runner R${i + 1}`,
       role: 'runner_strip',
-      dimensions: [stripWidth, runnerLength, thickness],
+      dimensions: [stripWidth, thickness, wallRunnerLength],
       position: [globalBounds.w - thickness - stripWidth, posY, frontSetback],
       rotation: [0, 0, 0],
       features: [],
       layer: 'OUTSIDE_CUT',
       materialThickness: thickness,
     });
+
+    // Matching mode: generate drawer-side runners too
+    if (runnerConfig.mode === 'matching') {
+      // Drawer runner length matches the drawer box depth
+      const drawerRunnerLength = globalBounds.d - 50; // same clearance as drawer box
+      const drawerRunnerPosY = posY + thickness; // sits on top of wall runner
+
+      // Drawer runner — left side (positioned inside the wall runner)
+      strips.push({
+        id: `drawer_runner_left_${i + 1}`,
+        label: `Drawer Runner L${i + 1}`,
+        role: 'runner_strip',
+        dimensions: [stripWidth, thickness, drawerRunnerLength],
+        position: [thickness + stripWidth, drawerRunnerPosY, 0],
+        rotation: [0, 0, 0],
+        features: [],
+        layer: 'OUTSIDE_CUT',
+        materialThickness: thickness,
+      });
+
+      // Drawer runner — right side
+      strips.push({
+        id: `drawer_runner_right_${i + 1}`,
+        label: `Drawer Runner R${i + 1}`,
+        role: 'runner_strip',
+        dimensions: [stripWidth, thickness, drawerRunnerLength],
+        position: [globalBounds.w - thickness - 2 * stripWidth, drawerRunnerPosY, 0],
+        rotation: [0, 0, 0],
+        features: [],
+        layer: 'OUTSIDE_CUT',
+        materialThickness: thickness,
+      });
+    }
   }
 
   return strips;
@@ -605,21 +663,10 @@ export function validateShelfConfig(config: AssemblyConfig): string[] {
     }
   }
 
-  // Validate shelf runners
+  // Validate drawer runners
   if (runnerConfig?.enabled) {
-    const toeKickHeight = features.toeKick.enabled ? features.toeKick.height : 0;
-    const interiorHeight = h - 2 * thickness - toeKickHeight;
-
-    for (let i = 0; i < runnerConfig.positions.length; i++) {
-      const pos = runnerConfig.positions[i];
-      if (pos < 0) {
-        errors.push(`Shelf runner position ${i + 1} (${pos}mm) must be non-negative.`);
-      }
-      if (pos > interiorHeight) {
-        errors.push(
-          `Shelf runner position ${i + 1} (${pos}mm) exceeds interior height (${interiorHeight}mm).`
-        );
-      }
+    if (!features.drawers.enabled || features.drawers.count <= 0) {
+      errors.push('Drawer runners are enabled but no drawers are configured.');
     }
   }
 
