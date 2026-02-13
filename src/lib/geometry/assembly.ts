@@ -24,6 +24,7 @@ import {
   generateLeftSidePanel,
   generateRightSidePanel,
   generateToeKickPanel,
+  generateBackStretchers,
 } from './carcass';
 
 import {
@@ -134,6 +135,10 @@ export function buildAssembly(config: AssemblyConfig): Assembly {
   if (toeKickComponent) {
     components.push(toeKickComponent);
   }
+
+  // 2c. Generate back stretchers (if any)
+  const stretcherComponents = generateBackStretchers(config);
+  components.push(...stretcherComponents);
 
   // 3. Generate adjustable shelves
   const shelves = generateShelves(config);
@@ -311,6 +316,10 @@ export function recalculateAssembly(
       carcassJoint: {
         ...assembly.config.features.carcassJoint,
         ...(newConfig.features?.carcassJoint || {}),
+      },
+      backStretchers: {
+        ...assembly.config.features.backStretchers,
+        ...(newConfig.features?.backStretchers || {}),
       },
     },
   };

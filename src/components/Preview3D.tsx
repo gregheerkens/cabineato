@@ -31,6 +31,7 @@ const ROLE_COLORS: Record<ComponentRole, string> = {
   drawer_bottom: '#FFE4C4',      // Bisque
   toe_kick_panel: '#A0522D',     // Sienna
   runner_strip: '#CD853F',       // Peru
+  back_stretcher: '#A0522D',    // Sienna
 };
 
 /**
@@ -133,6 +134,8 @@ function AssemblyView({
         return [0, -offset * 0.3, 0];
       case 'runner_strip':
         return [0, 0, -offset * 0.3];
+      case 'back_stretcher':
+        return [0, 0, offset];
       default:
         return [0, 0, 0];
     }

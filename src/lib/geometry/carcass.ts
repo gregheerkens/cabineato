@@ -592,6 +592,54 @@ export function generateToeKickPanel(config: AssemblyConfig): Component | null {
 }
 
 /**
+ * Generate back stretcher components
+ *
+ * Horizontal rails at the rear of the cabinet spanning between the side panels.
+ * Positioned flush with the back edge, in front of the back panel.
+ */
+export function generateBackStretchers(config: AssemblyConfig): Component[] {
+  const { globalBounds, material, features } = config;
+  if (!features.backStretchers.enabled) return [];
+
+  const thickness = material.thickness;
+  const stretcherWidth = globalBounds.w - 2 * thickness;
+  const stretcherHeight = features.backStretchers.height;
+  const posZ = globalBounds.d - thickness;
+  const toeKickHeight = features.toeKick.enabled ? features.toeKick.height : 0;
+  const components: Component[] = [];
+
+  if (features.backStretchers.top) {
+    components.push({
+      id: generateId('back_stretcher_top'),
+      label: 'Back Stretcher (Top)',
+      role: 'back_stretcher',
+      dimensions: [stretcherWidth, stretcherHeight, thickness],
+      position: [thickness, globalBounds.h - thickness - stretcherHeight, posZ],
+      rotation: [0, 0, 0],
+      features: [],
+      layer: 'OUTSIDE_CUT',
+      materialThickness: thickness,
+    });
+  }
+
+  if (features.backStretchers.bottom) {
+    components.push({
+      id: generateId('back_stretcher_bottom'),
+      label: 'Back Stretcher (Bottom)',
+      role: 'back_stretcher',
+      dimensions: [stretcherWidth, stretcherHeight, thickness],
+      position: [thickness, toeKickHeight + thickness, posZ],
+      rotation: [0, 0, 0],
+      features: [],
+      layer: 'OUTSIDE_CUT',
+      materialThickness: thickness,
+    });
+  }
+
+  return components;
+}
+
+/**
  * Calculate interior bounds of the carcass
  *
  * This is the usable interior space after accounting for:

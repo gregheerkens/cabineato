@@ -20,6 +20,7 @@ import type {
   DrawerPullConfig,
   ToeKickConfig,
   CarcassJointConfig,
+  BackStretcherConfig,
   AssemblyPredrillConfig,
   SlidePredrillConfig,
 } from './assembly';
@@ -217,6 +218,15 @@ export const TOE_KICK_DEFAULTS = {
 } as const;
 
 // ============================================================================
+// Back Stretcher Constants
+// ============================================================================
+
+export const BACK_STRETCHER_DEFAULTS = {
+  /** Default stretcher rail height in mm */
+  HEIGHT: 75,
+} as const;
+
+// ============================================================================
 // Assembly Tolerances
 // ============================================================================
 
@@ -333,6 +343,14 @@ export const DEFAULT_TOE_KICK: ToeKickConfig = {
   generatePanel: true,
 };
 
+/** Default back stretcher configuration */
+export const DEFAULT_BACK_STRETCHERS: BackStretcherConfig = {
+  enabled: false,
+  top: true,
+  bottom: true,
+  height: BACK_STRETCHER_DEFAULTS.HEIGHT,
+};
+
 /** Default carcass joint configuration */
 export const DEFAULT_CARCASS_JOINT: CarcassJointConfig = {
   type: 'butt',
@@ -375,6 +393,7 @@ export const DEFAULT_ASSEMBLY_CONFIG: AssemblyConfig = {
     drawers: DEFAULT_DRAWERS,
     toeKick: DEFAULT_TOE_KICK,
     carcassJoint: DEFAULT_CARCASS_JOINT,
+    backStretchers: DEFAULT_BACK_STRETCHERS,
   },
   predrills: {
     assembly: DEFAULT_ASSEMBLY_PREDRILLS,

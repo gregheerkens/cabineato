@@ -58,6 +58,10 @@ function createTestConfig(overrides: Partial<AssemblyConfig> = {}): AssemblyConf
         ...DEFAULT_ASSEMBLY_CONFIG.features.carcassJoint,
         ...(overrides.features?.carcassJoint || {}),
       },
+      backStretchers: {
+        ...DEFAULT_ASSEMBLY_CONFIG.features.backStretchers,
+        ...(overrides.features?.backStretchers || {}),
+      },
     },
   };
 }
@@ -210,11 +214,6 @@ describe('Test 3: Shelf Pin Alignment', () => {
     const config = createTestConfig({
       globalBounds: { w: 600, h: 720, d: 560 },
       material: { thickness: 18, kerf: 0 },
-      features: {
-        shelves: { enabled: true, count: 2, frontSetback: 37, rearSetback: 37 },
-        drawers: { enabled: false, count: 0, slideWidth: 12.7, overlayAmount: 19 },
-        toeKick: { enabled: true, height: 100, depth: 75 },
-      },
     });
 
     const leftHoles = generateSidePanelShelfHoles(config, 'left');
@@ -237,13 +236,7 @@ describe('Test 3: Shelf Pin Alignment', () => {
   });
 
   it('Holes follow System 32 spacing (32mm)', () => {
-    const config = createTestConfig({
-      features: {
-        shelves: { enabled: true, count: 2, frontSetback: 37, rearSetback: 37 },
-        drawers: { enabled: false, count: 0, slideWidth: 12.7, overlayAmount: 19 },
-        toeKick: { enabled: true, height: 100, depth: 75 },
-      },
-    });
+    const config = createTestConfig();
 
     const holes = generateSidePanelShelfHoles(config, 'left');
 
@@ -264,9 +257,8 @@ describe('Test 3: Shelf Pin Alignment', () => {
   it('Hole diameter is 5mm per System 32', () => {
     const config = createTestConfig({
       features: {
-        shelves: { enabled: true, count: 2, frontSetback: 37, rearSetback: 37 },
-        drawers: { enabled: false, count: 0, slideWidth: 12.7, overlayAmount: 19 },
-        toeKick: { enabled: false, height: 100, depth: 75 },
+        ...DEFAULT_ASSEMBLY_CONFIG.features,
+        toeKick: { ...DEFAULT_ASSEMBLY_CONFIG.features.toeKick, enabled: false },
       },
     });
 
@@ -281,9 +273,8 @@ describe('Test 3: Shelf Pin Alignment', () => {
     const SETBACK = 37;
     const config = createTestConfig({
       features: {
-        shelves: { enabled: true, count: 2, frontSetback: SETBACK, rearSetback: SETBACK },
-        drawers: { enabled: false, count: 0, slideWidth: 12.7, overlayAmount: 19 },
-        toeKick: { enabled: false, height: 100, depth: 75 },
+        ...DEFAULT_ASSEMBLY_CONFIG.features,
+        toeKick: { ...DEFAULT_ASSEMBLY_CONFIG.features.toeKick, enabled: false },
       },
     });
 
@@ -344,13 +335,13 @@ describe('Assembly Building', () => {
   it('includes shelves when enabled', () => {
     const config = createTestConfig({
       features: {
+        ...DEFAULT_ASSEMBLY_CONFIG.features,
         shelves: {
-          adjustable: { enabled: true, count: 3, frontSetback: 37, rearSetback: 37 },
-          fixed: { enabled: false, positions: [], dadoDepth: 6, useSecondaryMaterial: false },
-          runners: { enabled: false, positions: [], frontSetback: 50, rearSetback: 50, holeDiameter: 4, holesPerRunner: 3 },
+          ...DEFAULT_ASSEMBLY_CONFIG.features.shelves,
+          adjustable: { ...DEFAULT_ASSEMBLY_CONFIG.features.shelves.adjustable, enabled: true, count: 3 },
         },
-        drawers: { enabled: false, count: 0, slideWidth: 12.7, overlayAmount: 19 },
-        toeKick: { enabled: false, height: 100, depth: 75 },
+        drawers: { ...DEFAULT_ASSEMBLY_CONFIG.features.drawers, enabled: false, count: 0 },
+        toeKick: { ...DEFAULT_ASSEMBLY_CONFIG.features.toeKick, enabled: false },
       },
     });
 
@@ -367,11 +358,6 @@ describe('Assembly Building', () => {
     const config = createTestConfig({
       globalBounds: { w: 600, h: 720, d: 560 },
       material: { thickness: 18, kerf: 0 },
-      features: {
-        shelves: { enabled: false, count: 0, frontSetback: 37, rearSetback: 37 },
-        drawers: { enabled: false, count: 0, slideWidth: 12.7, overlayAmount: 19 },
-        toeKick: { enabled: true, height: 100, depth: 75 },
-      },
     });
 
     const interior = calculateInteriorBounds(config);

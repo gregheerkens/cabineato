@@ -264,6 +264,18 @@ export function ParameterForm({
     [config.features, updateConfig]
   );
 
+  const updateBackStretchers = useCallback(
+    (updates: Partial<typeof config.features.backStretchers>) => {
+      updateConfig({
+        features: {
+          ...config.features,
+          backStretchers: { ...config.features.backStretchers, ...updates },
+        },
+      });
+    },
+    [config.features, updateConfig]
+  );
+
   const updateSecondaryMaterial = useCallback(
     (updates: Partial<NonNullable<typeof config.secondaryMaterial>>) => {
       updateConfig({
@@ -525,6 +537,42 @@ export function ParameterForm({
         <p className="text-xs text-gray-500 -mt-2">
           Through-drill points on side panels for Kreg jig alignment
         </p>
+      </Section>
+
+      {/* Back Stretchers Section */}
+      <Section title="Back Stretchers" defaultOpen={false}>
+        <Toggle
+          label="Enable Back Stretchers"
+          checked={config.features.backStretchers.enabled}
+          onChange={(v) => updateBackStretchers({ enabled: v })}
+        />
+        <p className="text-xs text-gray-500 -mt-2">
+          Horizontal rails at the rear for structural reinforcement
+        </p>
+        {config.features.backStretchers.enabled && (
+          <div className="space-y-4 mt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Toggle
+                label="Top Stretcher"
+                checked={config.features.backStretchers.top}
+                onChange={(v) => updateBackStretchers({ top: v })}
+              />
+              <Toggle
+                label="Bottom Stretcher"
+                checked={config.features.backStretchers.bottom}
+                onChange={(v) => updateBackStretchers({ bottom: v })}
+              />
+            </div>
+            <NumberInput
+              label="Stretcher Height"
+              value={config.features.backStretchers.height}
+              onChange={(v) => updateBackStretchers({ height: v })}
+              min={25}
+              max={150}
+              showImperial={showImperial}
+            />
+          </div>
+        )}
       </Section>
 
       {/* Back Panel Section */}

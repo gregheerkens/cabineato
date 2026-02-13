@@ -101,6 +101,10 @@ export function useAssembly(
           ...prev.features.carcassJoint,
           ...(updates.features?.carcassJoint || {}),
         },
+        backStretchers: {
+          ...prev.features.backStretchers,
+          ...(updates.features?.backStretchers || {}),
+        },
       },
     }));
   }, []);

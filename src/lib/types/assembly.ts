@@ -112,7 +112,8 @@ export type ComponentRole =
   | 'drawer_back'
   | 'drawer_bottom'
   | 'toe_kick_panel'
-  | 'runner_strip';
+  | 'runner_strip'
+  | 'back_stretcher';
 
 /**
  * Component - Atomic unit representing a single panel/part
@@ -325,6 +326,22 @@ export interface ToeKickConfig {
 }
 
 // ============================================================================
+// Back Stretcher Configuration
+// ============================================================================
+
+/** Back stretcher configuration for rear reinforcement rails */
+export interface BackStretcherConfig {
+  /** Whether to include back stretchers */
+  enabled: boolean;
+  /** Include top stretcher (just below top panel) */
+  top: boolean;
+  /** Include bottom stretcher (just above bottom panel) */
+  bottom: boolean;
+  /** Rail height in mm */
+  height: number;
+}
+
+// ============================================================================
 // Carcass Joint Configuration
 // ============================================================================
 
@@ -376,6 +393,7 @@ export interface AssemblyConfig {
     drawers: DrawerConfig;
     toeKick: ToeKickConfig;
     carcassJoint: CarcassJointConfig;
+    backStretchers: BackStretcherConfig;
   };
   /** Pre-drill configurations */
   predrills: {

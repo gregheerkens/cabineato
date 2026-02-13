@@ -99,13 +99,16 @@ export function calculateDrawerDimensions(
   // Box interior width = exterior - (2 * box material thickness)
   const boxInteriorWidth = boxExteriorWidth - 2 * DRAWER_BOX_THICKNESS;
 
-  // Drawer depth - leave some clearance at the back
-  let boxDepth = globalBounds.d - 50; // 50mm clearance at back
+  const thickness = config.material.thickness;
+
+  // Drawer depth - rear face must stay at least material thickness + 1mm from cabinet back
+  const rearClearance = thickness + 1;
+  let boxDepth = globalBounds.d - rearClearance;
 
   // Adjust for back panel if inset
   if (backPanel.type === 'inset') {
     const insetDistance = backPanel.insetDistance ?? 10;
-    boxDepth = globalBounds.d - insetDistance - backPanel.thickness - 20;
+    boxDepth = Math.min(boxDepth, globalBounds.d - insetDistance - backPanel.thickness - rearClearance);
   }
 
   // Calculate available height for drawers

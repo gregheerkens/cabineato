@@ -22,7 +22,7 @@ interface CutListProps {
 const GROUPS: { name: string; roles: ComponentRole[] }[] = [
   {
     name: 'Carcass',
-    roles: ['side_panel_left', 'side_panel_right', 'top_panel', 'bottom_panel'],
+    roles: ['side_panel_left', 'side_panel_right', 'top_panel', 'bottom_panel', 'back_stretcher'],
   },
   { name: 'Back', roles: ['back_panel'] },
   { name: 'Shelves', roles: ['shelf', 'runner_strip'] },
